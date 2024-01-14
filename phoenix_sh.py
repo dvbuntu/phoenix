@@ -8,17 +8,18 @@ import numpy as np
 from shapely.plotting import plot_line, plot_points, plot_polygon
 from skspatial.objects import LineSegment, Line
 
+# should read this from a config?  But like, another python config?
 a = 1
-gap = a/6
-tip_x = -5*a
-tip_y = 6*a
+gap = a/4
 mid_x = 0
-mid_y = 5*a
+mid_y = 5.5*a
+tip_x = -4*a
+tip_y = 4*mid_y/3
 c_x = 2*a # right polyline here
-c_y = 3*a/2
+c_y = 7*a/4
 phi = np.pi/6
-alph = np.pi/4
-sig = np.pi/6
+alph = np.pi/3
+sig = np.pi/18
 beta = np.pi-np.arctan2(tip_y-mid_y, tip_x-mid_x)
 
 bottom = Line.from_points([-10*a,0], [10*a,0])
@@ -79,9 +80,18 @@ B1 = Polygon(b11.coords[:] + list(reversed(b12.coords[1:])) + [tuple(b1_int)],
 
 patches.append(B1)
 
+# head
+head1 = next_line(w1, bottom, wing_tip, -gap)
+head_base = head1.coords[5:7]
+#head_base = sh.LineString(
+
 p = PatchCollection(patches, match_original=True)
 fig, ax  = plt.subplots()
 ax.add_collection(p)
 ax.set_xlim(-8*a,8*a)
-ax.set_ylim(0,8*a)
+ax.set_ylim(0,12*a)
+plt.gca().set_aspect('equal')
+
+
+sh.plotting.plot_line(head1)
 
