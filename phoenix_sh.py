@@ -17,7 +17,7 @@ mid_y = 5.5*a
 tip_x = -3.6*a
 tip_y = 5*mid_y/4
 c_x = 2.15*a # right polyline here
-c_y = 10*a/4
+c_y = 8*a/4
 phi = np.pi/6
 alph = np.pi/3
 sig = np.pi/18
@@ -99,8 +99,8 @@ h1sl = sh.LineString([h1s.coords[1], [h1s.coords[1][0]-gap/2, h1s.coords[1][1]]]
 h1sd = sh.LineString([h1s.coords[0], [h1s.coords[0][0], h1s.coords[0][1]-gap/2]])
 
 ## get normal direction
-d = Line.from_points(*w1_piece.coords[:]).direction
-d = np.array([-d[1],d[0]])
+d0 = Line.from_points(*w1_piece.coords[:]).direction
+d = np.array([-d0[1],d0[0]])
 
 h1sn1 = Line(h1sl.coords[1], d/np.sqrt(np.sum(d**2)))
 h1sn1 = sh.LineString([h1sn1.point, h1sn1.to_point(-a)])
@@ -108,14 +108,19 @@ h1sn1 = sh.LineString([h1sn1.point, h1sn1.to_point(-a)])
 h1sn2 = Line(h1sd.coords[1], d/np.sqrt(np.sum(d**2)))
 h1sn2 = sh.LineString([h1sn2.point, h1sn2.to_point(-a/2)])
 
-h1st = sh.LineString([h1sn1.coords[1], [h1sn2.coords[1][0], h1sn1.coords[1][1]]])
-h1sr = sh.LineString([h1sn2.coords[1], [h1sn2.coords[1][0], h1sn1.coords[1][1]]])
+h1sb = Line(h1sn2.coords[1], -d0/np.sqrt(np.sum(d0**2)))
+h1sb = sh.LineString([h1sb.point, h1sb.to_point(-a/2)])
+
+h1st = sh.LineString([h1sn1.coords[1], [h1sb.coords[1][0], h1sn1.coords[1][1]]])
+h1sr = sh.LineString([[h1sb.coords[1][0], h1sb.coords[1][1]],
+            [h1sb.coords[1][0], h1sn1.coords[1][1]]])
 
 h1s = h1s.union(h1sl)
 h1s = h1s.union(h1sn1)
 h1s = h1s.union(h1sd)
 h1s = h1s.union(h1st)
 h1s = h1s.union(h1sr)
+h1s = h1s.union(h1sb)
 h1s = h1s.union(h1sn2)
 h1s = sh.ops.linemerge(h1s.normalize())
 
@@ -125,6 +130,24 @@ P2 = Polygon(h1s.coords[:],
         fill=True
         )
 patches.append(P2)
+
+# talon
+p3t = [(c_x+a/2, c_y+a/4)]
+p3t.append((p3t[-1][0]+a/2, p3t[-1][1]-a))
+p3t.append((p3t[-1][0],     p3t[-1][1]-a))
+p3t.append((p3t[-1][0]-a/4, p3t[-1][1]-a/2))
+p3s = sh.LineString(p3t)
+        
+# beak
+b2_pt = [(h1st.coords[-1][0]+a/4, h1st.coords[-1][1]+a/4)]
+
+b2t1 = Line(b2_pt[-1], d/np.sqrt(np.sum(d**2)))
+b2t1 = sh.LineString([b2t1.point, b2t1.to_point(-a/2)])
+b2_pt.append(b2t1.coords[-1])
+
+b2s = sh.LineString(b2_pt)
+
+
 
 # plot the patches
 p = PatchCollection(patches, match_original=True)
@@ -136,5 +159,9 @@ plt.gca().set_aspect('equal')
 
 
 #sh.plotting.plot_line(h1)
-#sh.plotting.plot_line(h1s,color='red')
+#sh.plotting.plot_line(p3s,color='red')
+sh.plotting.plot_line(b2s,color='red')
+
 plt.savefig('latest.png')
+
+
