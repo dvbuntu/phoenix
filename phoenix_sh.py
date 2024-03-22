@@ -133,17 +133,45 @@ patches.append(P2)
 
 # talon
 p3t = [(c_x+a/2, c_y+a/4)]
-p3t.append((p3t[-1][0]+a/2, p3t[-1][1]-a))
+p3t.append((p3t[-1][0]+a/2, p3t[-1][1]-2*a/3))
 p3t.append((p3t[-1][0],     p3t[-1][1]-a))
-p3t.append((p3t[-1][0]-a/4, p3t[-1][1]-a/2))
+p3t.append((p3t[-1][0]-a/4, 0))
+p3t.append((p3t[0][0]-a/3, p3t[-2][1]))
+p3t.append((p3t[-1][0], p3t[-4][1]))
 p3s = sh.LineString(p3t)
+
+P3 = Polygon(p3s.coords[:],
+        alpha=1.,
+        color='#F5A9B8', # pink
+        fill=True
+        )
+patches.append(P3)
+
         
 # beak
-b2_pt = [(h1st.coords[-1][0]+a/4, h1st.coords[-1][1]+a/4)]
+b2_pt = [(h1st.coords[-1][0]+gap, h1st.coords[-1][1]+gap)]
 
-b2t1 = Line(b2_pt[-1], d/np.sqrt(np.sum(d**2)))
+ddir = d/np.sqrt(np.sum(d**2))
+d0dir = d0/np.sqrt(np.sum(d0**2))
+b2t1 = Line(b2_pt[-1], ddir)
 b2t1 = sh.LineString([b2t1.point, b2t1.to_point(-a/2)])
+
+b2t1h = Line(b2t1.coords[-1], np.array([1,0]))
+b2t1h = sh.LineString([b2t1h.point, b2t1h.to_point(a/2)])
+
+b2t1d = Line(b2t1h.coords[-1], d0dir)
+b2t1d = sh.LineString([b2t1h.point, b2t1h.to_point(a/2)])
+
+
+#h1s = h1s.union(h1sl)
+#h1s = h1s.union(h1sn1)
+#h1s = h1s.union(h1sd)
+
 b2_pt.append(b2t1.coords[-1])
+p3t.append((b2_pt[-1][0]+a/2, b2+pt[-1][1]-2*a/3))
+
+
+
 
 b2s = sh.LineString(b2_pt)
 
