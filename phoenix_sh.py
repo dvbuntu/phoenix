@@ -115,6 +115,20 @@ h1st = sh.LineString([h1sn1.coords[1], [h1sb.coords[1][0], h1sn1.coords[1][1]]])
 h1sr = sh.LineString([[h1sb.coords[1][0], h1sb.coords[1][1]],
             [h1sb.coords[1][0], h1sn1.coords[1][1]]])
 
+if False:
+	# debugging...
+	colors = plt.color_sequences['tab10']
+	for i,hh in enumerate([h1s,
+					h1sl,
+					h1sn1,
+					h1sd,
+					h1st,
+					h1sr,
+					h1sb,
+					h1sn2]):
+		sh.plotting.plot_line(hh, color=colors[i])
+
+
 h1s = h1s.union(h1sl)
 h1s = h1s.union(h1sn1)
 h1s = h1s.union(h1sd)
@@ -124,7 +138,7 @@ h1s = h1s.union(h1sb)
 h1s = h1s.union(h1sn2)
 h1s = sh.ops.linemerge(h1s.normalize())
 
-P2 = Polygon(h1s.coords[:],
+P2 = Polygon(sh.get_coordinates(h1s),
         alpha=1.,
         color='#F5A9B8', # pink
         fill=True
@@ -160,7 +174,7 @@ b2t1h = Line(b2t1.coords[-1], np.array([1,0]))
 b2t1h = sh.LineString([b2t1h.point, b2t1h.to_point(a/2)])
 
 b2t1d = Line(b2t1h.coords[-1], d0dir)
-b2t1d = sh.LineString([b2t1h.point, b2t1h.to_point(a/2)])
+b2t1d = sh.LineString([b2t1d.point, b2t1d.to_point(a/2)])
 
 
 #h1s = h1s.union(h1sl)
@@ -168,7 +182,7 @@ b2t1d = sh.LineString([b2t1h.point, b2t1h.to_point(a/2)])
 #h1s = h1s.union(h1sd)
 
 b2_pt.append(b2t1.coords[-1])
-p3t.append((b2_pt[-1][0]+a/2, b2+pt[-1][1]-2*a/3))
+p3t.append((b2_pt[-1][0]+a/2, b2_pt[-1][1]-2*a/3))
 
 
 
