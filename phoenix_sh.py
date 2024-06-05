@@ -1,3 +1,4 @@
+# use shapely 2.0.3, bc 2.0.1 is busted
 import shapely as sh
 import shapely.ops
 # conda activate tf # this works, I guess
@@ -22,6 +23,7 @@ phi = np.pi/6
 alph = np.pi/3
 sig = np.pi/18
 beta = np.pi-np.arctan2(tip_y-mid_y, tip_x-mid_x)
+mouth = True
 
 bottom = Line.from_points([-10*a,0], [10*a,0])
 wing_tip = Line([tip_x,tip_y], [np.sin(sig), -np.cos(sig)])
@@ -170,39 +172,75 @@ d0dir = d0/np.sqrt(np.sum(d0**2))
 b2t1 = Line(b2_pt[-1], ddir)
 b2t1 = sh.LineString([b2t1.point, b2t1.to_point(-a/2)])
 
-b2t1h = Line(b2t1.coords[-1], np.array([1,0]))
-b2t1h = sh.LineString([b2t1h.point, b2t1h.to_point(a/2)])
+#b2t1h = Line(b2t1.coords[-1], np.array([1,0]))
+#b2t1h = sh.LineString([b2t1h.point, b2t1h.to_point(a/2)])
 
-b2t1d = Line(b2t1h.coords[-1], d0dir)
-b2t1d = sh.LineString([b2t1d.point, b2t1d.to_point(a/2)])
+b2t1d = Line(b2t1.coords[-1], d0dir)
+b2t1d = sh.LineString([b2t1d.point, b2t1d.to_point(-a)])
+
+b2t1r = Line(b2t1d.coords[-1], np.array([0,-1]))
+b2t1r = sh.LineString([b2t1r.point, b2t1r.to_point(a/4)])
+
+b2t1b = Line(b2t1r.coords[-1], ddir)
+b2t1b = sh.LineString([b2t1b.point, b2t1b.to_point(a/4)])
+
+# mouth cut out
+if mouth:
+	b2t1m1 = Line(b2t1b.coords[-1], d0dir)
+	b2t1m1 = sh.LineString([b2t1m1.point, b2t1m1.to_point(a/4)])
+	b2t1m2 = Line(b2t1m1.coords[-1], ddir)
+	b2t1m2 = sh.LineString([b2t1m2.point, b2t1m2.to_point(a/4)])
+	b2t1m3 = Line(b2t1m2.coords[-1], d0dir)
+	b2t1m3 = sh.LineString([b2t1m3.point, b2t1m3.to_point(-a/4)])
+else:
+	b2t1m3 = Line(b2t1b.coords[-1], ddir)
+	b2t1m3 = sh.LineString([b2t1m3.point, b2t1m3.to_point(a/4)])
+
+b2t1b2 = Line(b2t1m3.coords[-1], ddir)
+b2t1b2 = sh.LineString([b2t1b2.point, b2t1b2.to_point(a/4)])
+
+#b2t1bb = Line(b2t1b2.coords[-1], np.array([-1,0]))
+#b2t1bb = sh.LineString([b2t1bb.point, b2t1bb.to_point(a/3)])
+b2t1bb = sh.LineString([b2t1b2.coords[-1], (b2t1.coords[0][0], b2t1b2.coords[-1][1])])
+
+#b2t1 = b2t1.union(b2t1h)
+b2t1 = b2t1.union(b2t1d)
+b2t1 = b2t1.union(b2t1r)
+b2t1 = b2t1.union(b2t1b)
+if mouth:
+	b2t1 = b2t1.union(b2t1m1)
+	b2t1 = b2t1.union(b2t1m2)
+b2t1 = b2t1.union(b2t1m3)
+b2t1 = b2t1.union(b2t1b2)
+b2t1 = b2t1.union(b2t1bb)
+b2t1 = sh.ops.linemerge(b2t1.normalize())
+
+B2 = Polygon(sh.get_coordinates(b2t1),
+        alpha=1.,
+        color='#5BCEFA', # blue
+        fill=True,
+        )
+patches.append(B2)
 
 
-#h1s = h1s.union(h1sl)
-#h1s = h1s.union(h1sn1)
-#h1s = h1s.union(h1sd)
-
-b2_pt.append(b2t1.coords[-1])
-p3t.append((b2_pt[-1][0]+a/2, b2_pt[-1][1]-2*a/3))
-
-
-
-
-b2s = sh.LineString(b2_pt)
+#b2_pt.append(b2t1.coords[-1])
+#b2_pt.append((b2_pt[-1][0]+a/2, b2_pt[-1][1]-2*a/3))
+#b2s = sh.LineString(b2_pt)
 
 
 
 # plot the patches
-p = PatchCollection(patches, match_original=True)
+p = PatchCollection(patches, match_original=True, edgecolor='k')
 fig, ax  = plt.subplots()
 ax.add_collection(p)
-ax.set_xlim(-8*a,8*a)
-ax.set_ylim(0,12*a)
+ax.set_xlim(-4*a,4*a)
+ax.set_ylim(0,8*a)
 plt.gca().set_aspect('equal')
 
 
 #sh.plotting.plot_line(h1)
 #sh.plotting.plot_line(p3s,color='red')
-sh.plotting.plot_line(b2s,color='red')
+#sh.plotting.plot_line(b2s,color='red')
 
 plt.savefig('latest.png')
 
